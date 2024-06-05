@@ -7,7 +7,7 @@ const openai = new OpenAIApi({ apiKey: process.env.OPENAI_API_KEY });
 let cache = {};
 
 async function classifyTicket(ticket_id, ticket_comment) {
-  const db = new sqlite3.Database("fetchAndStoreTicketFields");
+  const db = new sqlite3.Database("./zendeskTickets.db");
   const ticketFieldId = process.env.ZENDESK_FIELD_ID;
   const cacheKey = `ticket_fields_${ticketFieldId}`;
 
@@ -19,19 +19,27 @@ async function classifyTicket(ticket_id, ticket_comment) {
   ) {
     categories = cache[cacheKey].data;
   } else {
-    categories = await fetchTicketField(db, ticketFieldId);
-    cache[cacheKey] = { data: fields, timestamp: Date.now() };
+    const fetchedCategories = await fetchTicketField(db, ticketFieldId);
+    if (fetchedCategories[0] && fetchedCategories[0].field_values) {
+      // Parse the JSON string into an array
+      const parsedCategories = JSON.parse(fetchedCategories[0].field_values);
+      categories = parsedCategories;
+
+      cache[cacheKey] = { data: categories, timestamp: Date.now() };
+    }
   }
 
   const messages = [
     {
       role: "user",
       content:
-        "Your task is to classify the ticket comment sent in the next message into predefined categories. You will then provide the classification and a summary of the reasoning. If none of the categories closely match, then the 'unknown'",
+        "Your task is to classify the ticket comment sent in the next message into one of the predefined categories in snake_case format. Provide the classification and a brief summary of the reasoning. If none of the categories closely match, use 'unknown'.",
     },
     {
       role: "user",
-      content: `Please classify the following ticket comment: "${ticket_comment}", using one of the following categories: "${categories}"`,
+      content: `Please classify the following ticket comment: "${ticket_comment}", using one of the following categories: ${categories.join(
+        ", "
+      )}.`,
     },
   ];
   const tools = [
@@ -40,17 +48,18 @@ async function classifyTicket(ticket_id, ticket_comment) {
       function: {
         name: "classify_comment",
         description:
-          "Takes the output of a ticket classification model and returns the category and summary of the classification reasoning.",
+          "Takes the output of a ticket classification model and returns a  and summary of the classification reasoning.",
         parameters: {
           type: "object",
           properties: {
             summary: {
               type: "string",
               description:
-                "A single sentence summary of the classification reasoning",
+                "A brief summary of the reasoning behind the classification. If its unknown, please provide a reason.",
             },
             category: {
               type: "string",
+              enum: categories,
               description:
                 "The ticket category that most closely matches the comment",
             },
@@ -61,12 +70,31 @@ async function classifyTicket(ticket_id, ticket_comment) {
     },
   ];
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: messages,
-    tools: tools,
-    tool_choice: "auto",
-  });
+  const response = await openai.chat.completions
+    .create({
+      model: "gpt-4o",
+      messages: messages,
+      tools: tools,
+      tool_choice: "auto",
+    })
+    .catch((error) => {
+      console.error("OpenAI API Error:", error);
+      return null;
+    });
+
+  if (
+    !response ||
+    !response.choices ||
+    !response.choices[0] ||
+    !response.choices[0].message
+  ) {
+    console.error("Invalid or no response from OpenAI");
+    return {
+      ticket_id: ticket_id,
+      category: "unknown",
+      summary: "Invalid or no response from OpenAI",
+    };
+  }
 
   const responseMessage = response.choices[0].message;
 
@@ -85,6 +113,13 @@ async function classifyTicket(ticket_id, ticket_comment) {
     }
     const result = JSON.parse(toolCall.function.arguments);
 
+    if (!result.category || !result.summary) {
+      return {
+        ticket_id: ticket_id,
+        category: "unknown",
+        summary: "OpenAI did not return a valid classification.",
+      };
+    }
     // Store the classification in the database
     const insertQuery = `INSERT OR REPLACE INTO ticket_classifications (ticket_id, classification, summary) VALUES (?, ?, ?)`;
     db.run(insertQuery, [ticket_id, result.category, result.summary], (err) => {
@@ -92,6 +127,7 @@ async function classifyTicket(ticket_id, ticket_comment) {
         console.error("Error inserting classification data:", err);
       }
     });
+
     return {
       ticket_id: ticket_id,
       category: result.category,

@@ -2,11 +2,12 @@ require('dotenv').config();
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 
+const ticketFieldId = process.env.ZENDESK_FIELD_ID;
+
 let cachedTicketFields = null;
 let cacheTimestamp = null;
 
 const fetchTicketFieldsFromAPI = async () => {
-  const ticketFieldId = process.env.ZENDESK_FIELD_ID;
   const config = {
     method: 'get',
     url: `https://${process.env.ZD_SUBDOMAIN}.zendesk.com/api/v2/ticket_fields/${ticketFieldId}/options`,
@@ -43,7 +44,7 @@ const fetchAndStoreTicketFields = async () => {
     const insertQuery = `INSERT OR REPLACE INTO ticket_fields (field_id, field_values) VALUES (?, ?)`;
 
     // Using a fixed ID for simplicity; adjust as necessary for multiple fields
-    db.run(insertQuery, [1, categoriesSerialized], (err) => {
+    db.run(insertQuery, [ticketFieldId, categoriesSerialized], (err) => {
       if (err) {
         console.error('Error inserting field data:', err);
       }
