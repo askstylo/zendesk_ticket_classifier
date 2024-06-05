@@ -1,0 +1,21 @@
+value,tag,default
+Order Inquiry,order_inquiry,False
+Payment Issue,payment_issue,False
+Shipping Delay,shipping_delay,False
+Return Request,return_request,False
+Refund Processing,refund_processing,False
+Product Availability,product_availability,False
+Product Defect,product_defect,False
+Account Access,account_access,False
+Subscription Management,subscription_management,False
+Technical Support,technical_support,False
+Feedback and Complaints,feedback_complaints,False
+Warranty Claim,warranty_claim,False
+Discount Inquiry,discount_inquiry,False
+Loyalty Program,loyalty_program,False
+Website Navigation Help,website_navigation_help,False
+Privacy Concern,privacy_concern,False
+Billing Inquiry,billing_inquiry,False
+Appointment Scheduling,appointment_scheduling,False
+Custom Orders,custom_orders,False
+Promotions and Offers,promotions_offers,False

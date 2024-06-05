@@ -6,7 +6,7 @@ const openai = new OpenAIApi({ apiKey: process.env.OPENAI_API_KEY });
 
 let cache = {};
 
-async function classifyTicket(ticket_id, ticket_comment) {
+async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
   const db = new sqlite3.Database("./zendeskTickets.db");
   const ticketFieldId = process.env.ZENDESK_FIELD_ID;
   const cacheKey = `ticket_fields_${ticketFieldId}`;
@@ -37,9 +37,7 @@ async function classifyTicket(ticket_id, ticket_comment) {
     },
     {
       role: "user",
-      content: `Please classify the following ticket comment: "${ticket_comment}", using one of the following categories: ${categories.join(
-        ", "
-      )}.`,
+      content: `Please classify the following ticket: {subject: "${ticket_subject}", body: "${ticket_comment}"}`,
     },
   ];
   const tools = [

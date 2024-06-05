@@ -32,8 +32,8 @@ async function updateZendeskTicket(ticket_id, classification) {
   if (classification.category === "unknown") {
     config = {
       headers: {
-        'Authorization': `Basic ${process.env.ZD_AUTH}`,
-        'Content-Type': 'application/json'
+        Authorization: `Basic ${process.env.ZD_AUTH}`,
+        "Content-Type": "application/json",
       },
       method: "PUT",
       url: `https://${process.env.ZD_SUBDOMAIN}.zendesk.com/api/v2/tickets/update_many`,
@@ -53,8 +53,8 @@ async function updateZendeskTicket(ticket_id, classification) {
     method: "PUT",
     url: `https://${process.env.ZD_SUBDOMAIN}.zendesk.com/api/v2/tickets/update_many`,
     headers: {
-      'Authorization': `Basic ${process.env.ZD_AUTH}`,
-      'Content-Type': 'application/json'
+      Authorization: `Basic ${process.env.ZD_AUTH}`,
+      "Content-Type": "application/json",
     },
     params: { ids: urlEncodedTicketId },
     data: JSON.stringify({
@@ -107,22 +107,22 @@ app.get("/api/tickets/:ticket_id", (req, res) => {
 app.post("/webhook/classify_tickets", async (req, res) => {
   const signature = req.headers["x-zendesk-webhook-signature"];
   const timestamp = req.headers["x-zendesk-webhook-timestamp"]; // Ensure this header is being sent by Zendesk
-  const body = req.rawBody;
 
   // Verify webhook signature
- // if (!isValidSignature(signature, body, timestamp)) {
- //   return res.status(401).send("Invalid webhook signature.");
- // }
+  if (!isValidSignature(signature, body, timestamp)) {
+    return res.status(401).send("Invalid webhook signature.");
+  }
 
   // Assuming ticket_id and ticket_comment are sent in the POST request body
-  const { ticket_id, ticket_comment } = req.body;
-  if (!ticket_id || !ticket_comment) {
+  const { ticket_id, ticket_subject, ticket_comment } = req.body;
+  console.log(req.body);
+  if (!ticket_id || !ticket_subject || !ticket_comment) {
     return res.status(400).send("Missing ticket information.");
   }
 
   // Classify the ticket comment
-  const classification = await classifyTicket(ticket_id, ticket_comment);
-  
+  const classification = await classifyTicket(ticket_id, ticket_subject, ticket_comment);
+
   if (!classification) {
     return res.status(500).send("Error processing ticket.");
   }
@@ -137,7 +137,7 @@ async function startServer() {
   await initializeDatabase();
   await getTicketFields();
   app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
 }
 
