@@ -1,6 +1,10 @@
 # Zendesk Ticket Classifier
 
-This project integrates the Zendesk ticketing system with OpenAI's language models to automatically classify tickets based on their content. This automation helps streamline ticket triage and improve response times.
+This project integrates the Zendesk ticketing system with OpenAI function calling to automatically classify tickets based on their content.
+
+## This project can help you
+- Automatically triage and assign tickets based off categories specific to your organization.
+- Classify your tickets allowing for increased visibility in your explore reporting.
 
 ## Features
 
