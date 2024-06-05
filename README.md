@@ -1,13 +1,12 @@
-
 # Zendesk Ticket Classifier
 
-This project is designed to demonstrate the integration of Zendesk ticketing system with OpenAI's powerful language models to classify and update a ticket field automatically based on their content. Which in turn allows for you to automatically triage tickets.
+This project integrates the Zendesk ticketing system with OpenAI's language models to automatically classify tickets based on their content. This automation helps streamline ticket triage and improve response times.
 
 ## Features
 
-- **Ticket Classification**: Automatically classifies tickets using OpenAI based on the content of the ticket comments.
-- **Database Integration**: Uses SQLite to manage ticket data and classifications locally.
-- **Automated Ticket Updates**: Automatically updates ticket status and tags in Zendesk based on classification results.
+- **Ticket Classification**: Leverages OpenAI to analyze and categorize ticket content, facilitating faster issue resolution.
+- **Database Integration**: Utilizes SQLite to store and manage ticket data and classifications, enhancing data accessibility and security.
+- **Automated Ticket Updates**: Automatically updates ticket statuses and tags in Zendesk based on classification results, ensuring accurate ticket tracking.
 
 ## Prerequisites
 
@@ -15,17 +14,19 @@ This project is designed to demonstrate the integration of Zendesk ticketing sys
 - npm (or yarn)
 - Access to Zendesk API with a valid API key
 - Access to OpenAI API with a valid API key
-- A Zendesk Dropdown Ticket Field with 'categories' set up that you find useful to your use case. An example of e-commerce categories can be found in `example-categories.csv`
+- A Zendesk Dropdown Ticket Field with predefined 'categories' relevant to your workflow
 
 ## Installation
 
 1. **Clone the Repository**
+
    ```bash
-   https://github.com/askstylo/zendesk_ticket_classifier.git
+   git clone https://github.com/askstylo/zendesk_ticket_classifier.git
    cd zendesk_ticket_classifier
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    ```
@@ -44,62 +45,47 @@ This project is designed to demonstrate the integration of Zendesk ticketing sys
 
 ## Usage
 
-## Spin up your own copy on Glitch
-1. [Remix your own copy](https://glitch.com/edit/#!/remix/silver-pointed-delivery)
-2. Copy the env.example into a env file and fill out all the values
-3. You're good to go!
+To use this application, start the server and send webhook requests from your Zendesk account:
 
+1. **Start the Server**
 
-- **Starting the Server**
-  ```bash
-  npm start
-  ```
+   ```bash
+   npm start
+   ```
 
-- **Send a webhook request from your Zendesk account** 
-The body should be formatted such as this:
+2. **Send a Webhook Request**
+   Format the body of the request as follows and send to the provided endpoint:
 
-```
-{
-    "ticket_id": "{{ticket.id}}",
-    "ticket_subject": "{{ticket.subject}}
-    "ticket_comment": "{{ticket.latest_public_comment_html}}"
-}
+   ```json
+   {
+     "ticket_id": "{{ticket.id}}",
+     "ticket_subject": "{{ticket.subject}}",
+     "ticket_comment": "{{ticket.latest_public_comment_html}}"
+   }
+   ```
 
-```
-
-2. The application will analyse the ticket, and choose the category from the available values in the ticket field you set up. It will then set the field according to that value
-3. If a category couldn't be found that encapsulates the ticket comment, it will tag the ticket with `human_triage_required` to allow for your team to handle accordingly.
-4. If you would like to dig into why a category was selected, you can hit the `/api/tickets/{ticket_id}` endpoint with the corresponding ticket_id to see a summary of the classification.
-
-  ```
+3. **Review Classification Results**
+   After classification, the ticket is updated with the determined category or tagged for manual review if no suitable category is found.
 
 ## API Endpoints
 
-- `GET /api/tickets/:ticket_id`: Fetches the classification details for a given ticket.
-- `POST /webhook/classify_tickets`: Receives webhook calls for ticket classification.
+- `GET /api/tickets/:ticket_id`: Returns classification details for a specific ticket.
+- `POST /webhook/classify_tickets`: Endpoint to receive ticket classification requests.
 
 ## Testing with Curl
 
-To manually test your API endpoints using curl comment out the below code found in `app.js`
+To test the API endpoints manually, first disable signature checks in `app.js`, then use the following commands:
 
-```
-  if (!isValidSignature(signature, body, timestamp)) {
-    return res.status(401).send("Invalid webhook signature.");
-  }
-```
+### GET a summary of a ticket classification
 
-### GET a summary of why a ticket was given a particular category.
 ```bash
 curl -X GET "http://localhost:3000/api/tickets/{ticket_id}" -H "Content-Type: application/json"
 ```
 
-### POST Webhook for Ticket Classification
+### POST a classification request
+
 ```bash
-curl -X POST "http://localhost:3000/webhook/classify_tickets" \
--H "Content-Type: application/json" \
--H "x-zendesk-webhook-signature: {your_signature}" \
--H "x-zendesk-webhook-signature-timestamp: {your_timestamp}" \
--d '{"ticket_id": "123", "ticket_comment": "Please check this issue"}'
+curl -X POST "http://localhost:3000/webhook/classify_tickets" -H "Content-Type: application/json" -H "x-zendesk-webhook-signature: {your_signature}" -H "x-zendesk-webhook-signature-timestamp: {your_timestamp}" -d '{"ticket_id": "123", "ticket_comment": "Please check this issue"}'
 ```
 
 ## Contributing
