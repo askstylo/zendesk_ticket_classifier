@@ -68,7 +68,7 @@ describe("API endpoints", () => {
         .send(body)
         .expect(200);
       
-      expect(axios.put).toHaveBeenCalled(); // Verify that axios.put was called to update the ticket
+      expect(axios.put).toHaveBeenCalled();
     });
   });
 });
