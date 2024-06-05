@@ -8,9 +8,9 @@ const crypto = require("crypto");
 const { initializeDatabase } = require("../scripts/dbSetup");
 const {
   fetchTicketClassification,
-} = require("./db_queries/fetchTicketClassification");
-const { getTicketFields } = require("./db_queries/fetchAndStoreTicketField");
-const { classifyTicket } = require("./openai");
+} = require("./helpers/fetchTicketClassification");
+const { getTicketFields } = require("./helpers/fetchAndStoreTicketField");
+const { classifyTicket } = require("./util/classifier");
 
 // Constants
 const app = express();
@@ -104,9 +104,10 @@ app.get("/api/tickets/:ticket_id", (req, res) => {
 });
 
 // Webhook endpoint for ticket classification
-app.post("/webhook/classify_tickets", async (req, res) => {
+app.post("/api/webhook/classify_tickets", async (req, res) => {
   const signature = req.headers["x-zendesk-webhook-signature"];
-  const timestamp = req.headers["x-zendesk-webhook-timestamp"]; // Ensure this header is being sent by Zendesk
+  const timestamp = req.headers["x-zendesk-webhook-timestamp"];
+  const body = req.rawBody;
 
   // Verify webhook signature
   if (!isValidSignature(signature, body, timestamp)) {

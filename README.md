@@ -74,7 +74,7 @@ To use this application, start the server and send webhook requests from your Ze
 ## API Endpoints
 
 - `GET /api/tickets/:ticket_id`: Returns classification details for a specific ticket.
-- `POST /webhook/classify_tickets`: Endpoint to receive ticket classification requests.
+- `POST /api/webhook/classify_tickets`: Endpoint to receive ticket classification requests.
 
 ## Testing with Curl
 

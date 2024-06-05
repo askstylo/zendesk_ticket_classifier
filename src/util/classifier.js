@@ -24,7 +24,6 @@ async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
       // Parse the JSON string into an array
       const parsedCategories = JSON.parse(fetchedCategories[0].field_values);
       categories = parsedCategories;
-
       cache[cacheKey] = { data: categories, timestamp: Date.now() };
     }
   }
