@@ -5,8 +5,8 @@ This project integrates the Zendesk ticketing system with OpenAI's language mode
 ## Features
 
 - **Ticket Classification**: Leverages OpenAI to analyze and categorize ticket content, facilitating faster issue resolution.
-- **Database Integration**: Utilizes SQLite to store and manage ticket data and classifications, enhancing data accessibility and security.
-- **Automated Ticket Updates**: Automatically updates ticket statuses and tags in Zendesk based on classification results, ensuring accurate ticket tracking.
+- **Database Integration**: Utilizes SQLite to store historical ticket classifications.
+- **Automated Ticket Updates**: Automatically updates ticket fields and tags in Zendesk based on classification results, ensuring accurate ticket tracking.
 
 ## Prerequisites
 
