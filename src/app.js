@@ -26,6 +26,8 @@ function isValidSignature(signature, body, timestamp) {
   return signature === digest;
 }
 
+
+// We use the update many endpoint to avoid ticket collisions. 
 async function updateZendeskTicket(ticket_id, classification) {
   const urlEncodedTicketId = encodeURIComponent(ticket_id);
   let config;

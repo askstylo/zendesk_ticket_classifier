@@ -45,7 +45,7 @@ async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
       function: {
         name: "classify_comment",
         description:
-          "Takes the output of a ticket classification model and returns a  and summary of the classification reasoning.",
+          "Takes the output of a ticket classification model and returns a category and summary of the classification reasoning.",
         parameters: {
           type: "object",
           properties: {
