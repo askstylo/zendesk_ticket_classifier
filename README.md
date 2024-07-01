@@ -42,7 +42,6 @@ This project integrates the Zendesk ticketing system with OpenAI function callin
    ZD_EMAIL=your_zendesk_email_here
    ZD_API_KEY=your_zendesk_api_key_here
    ZENDESK_FIELD_ID=your_field_id_here
-   ZD_AUTH=your_base64_encoded_auth_here
    OPENAI_API_KEY=your_openai_api_key_here
    DB_PATH=./zendeskTickets.db
    ```
