@@ -15,8 +15,8 @@ const { classifyTicket } = require("./util/classifier");
 // Constants
 const app = express();
 const PORT = process.env.PORT || 3000;
-// This signing secret is the one ZD always uses when testing webhooks before creation. It's not the same as the one you'd use in production. Replace this with ZD_SIGNING_SECRET from your .env file after activating the webhook.
-const TEST_SIGNING_SECRET = "dGhpc19zZWNyZXRfaXNfZm9yX3Rlc3Rpbmdfb25seQ==";
+
+const WEBHOOK_SIGNING_SECRET = process.env.WEBHOOK_SECRET;
 const AUTH = `${process.env.ZD_EMAIL}/token:${process.env.ZD_API_KEY}`;
 const ZD_AUTH = Buffer.from(AUTH).toString("base64");
 
@@ -55,7 +55,7 @@ const ZD_AUTH = Buffer.from(AUTH).toString("base64");
 
 // Helper function to validate the signature of incoming requests
 function isValidSignature(signature, body, timestamp) {
-  const hmac = crypto.createHmac("sha256", TEST_SIGNING_SECRET);
+  const hmac = crypto.createHmac("sha256", WEBHOOK_SIGNING_SECRET);
   const data = `${timestamp}.${body}`;
   const digest = `v0=${hmac.update(data).digest("hex")}`;
   return signature === digest;
