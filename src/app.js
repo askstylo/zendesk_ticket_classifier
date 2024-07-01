@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // This signing secret is the one ZD always uses when testing webhooks before creation. It's not the same as the one you'd use in production. Replace this with ZD_SIGNING_SECRET from your .env file after activating the webhook.
 const TEST_SIGNING_SECRET = "dGhpc19zZWNyZXRfaXNfZm9yX3Rlc3Rpbmdfb25seQ==";
-const AUTH = `${process.env.ZD_USER}/token:${process.env.ZD_API_TOKEN}`;
+const AUTH = `${process.env.ZD_EMAIL}/token:${process.env.ZD_API_KEY}`;
 const ZD_AUTH = Buffer.from(AUTH).toString("base64");
 
 

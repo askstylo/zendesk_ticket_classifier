@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 
 const ticketFieldId = process.env.ZENDESK_FIELD_ID;
 
-const AUTH = `${process.env.ZD_EMAIL}/token:${process.env.ZD_API_TOKEN}`;
+const AUTH = `${process.env.ZD_EMAIL}/token:${process.env.ZD_API_KEY}`;
 const ZD_AUTH = Buffer.from(AUTH).toString("base64");
 
 let cachedTicketFields = null;
