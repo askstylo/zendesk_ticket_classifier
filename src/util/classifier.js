@@ -6,18 +6,25 @@ const openai = new OpenAIApi({ apiKey: process.env.OPENAI_API_KEY });
 
 let cache = {};
 
-async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
+async function classifyTicket(
+  ticket_id,
+  ticket_subject,
+  ticket_comment,
+  categories
+) {
   const db = new sqlite3.Database("./zendeskTickets.db");
   const ticketFieldId = process.env.ZENDESK_FIELD_ID;
   const cacheKey = `ticket_fields_${ticketFieldId}`;
 
   // Fetch ticket fields from cache or database
-  let categories = [];
-  if (
+  let categoryArr = [];
+  if (categories) {
+    categoryArr = categories;
+  } else if (
     cache[cacheKey] &&
     Date.now() - cache[cacheKey].timestamp < 12 * 60 * 60 * 1000
   ) {
-    categories = cache[cacheKey].data;
+    categoryArr = cache[cacheKey].data;
   } else {
     const fetchedCategories = await fetchTicketField(db, ticketFieldId);
     if (fetchedCategories[0] && fetchedCategories[0].field_values) {
@@ -32,7 +39,7 @@ async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
     {
       role: "user",
       content:
-        "Your task is to classify the ticket comment sent in the next message into one of the predefined categories in snake_case format. Provide the classification and a brief summary of the reasoning. If none of the categories closely match, use 'unknown'.",
+        "Your task is to classify the ticket sent in the next message into one of the predefined categories in snake_case format. Provide the classification and a brief summary of the reasoning. If none of the categories closely match, use 'unknown'.",
     },
     {
       role: "user",
@@ -56,7 +63,7 @@ async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
             },
             category: {
               type: "string",
-              enum: categories,
+              enum: categoryArr,
               description:
                 "The ticket category that most closely matches the comment",
             },
@@ -72,7 +79,7 @@ async function classifyTicket(ticket_id, ticket_subject, ticket_comment) {
       model: "gpt-4o",
       messages: messages,
       tools: tools,
-      tool_choice: "auto",
+      tool_choice: "required",
     })
     .catch((error) => {
       console.error("OpenAI API Error:", error);

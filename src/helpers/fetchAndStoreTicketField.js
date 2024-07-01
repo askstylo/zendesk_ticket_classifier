@@ -4,6 +4,9 @@ const sqlite3 = require('sqlite3').verbose();
 
 const ticketFieldId = process.env.ZENDESK_FIELD_ID;
 
+const AUTH = `${process.env.ZD_EMAIL}/token:${process.env.ZD_API_TOKEN}`;
+const ZD_AUTH = Buffer.from(AUTH).toString("base64");
+
 let cachedTicketFields = null;
 let cacheTimestamp = null;
 
@@ -12,7 +15,7 @@ const fetchTicketFieldsFromAPI = async () => {
     method: 'get',
     url: `https://${process.env.ZD_SUBDOMAIN}.zendesk.com/api/v2/ticket_fields/${ticketFieldId}/options`,
     headers: {
-      'Authorization': `Basic ${process.env.ZD_AUTH}`,
+      'Authorization': `Basic ${ZD_AUTH}`,
       'Content-Type': 'application/json'
     }
   };

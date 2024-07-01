@@ -17,6 +17,41 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // This signing secret is the one ZD always uses when testing webhooks before creation. It's not the same as the one you'd use in production. Replace this with ZD_SIGNING_SECRET from your .env file after activating the webhook.
 const TEST_SIGNING_SECRET = "dGhpc19zZWNyZXRfaXNfZm9yX3Rlc3Rpbmdfb25seQ==";
+const AUTH = `${process.env.ZD_USER}/token:${process.env.ZD_API_TOKEN}`;
+const ZD_AUTH = Buffer.from(AUTH).toString("base64");
+
+
+// const staticCategories = [
+//   {
+//     value: "billing_issue",
+//     description:
+//       "When the customer is facing issues with billing, payment or refunds",
+//   },
+//   {
+//     value: "technical_issue",
+//     description:
+//       "When the customer is facing technical issues with the product or service",
+//   },
+//   {
+//     value: "account_issue",
+//     description:
+//       "When the customer is facing issues with their account or login",
+//   },
+//   {
+//     value: "product_information",
+//     description:
+//       "When the customer is asking for information about the product or service",
+//   },
+//   {
+//     value: "feature_request",
+//     description: "When the customer is requesting a new feature or enhancement",
+//   },
+//   {
+//     value: "complaint",
+//     description:
+//       "When the customer is expressing dissatisfaction or a complaint",
+//   },
+// ];
 
 // Helper function to validate the signature of incoming requests
 function isValidSignature(signature, body, timestamp) {
@@ -34,7 +69,7 @@ async function updateZendeskTicket(ticket_id, classification) {
   if (classification.category === "unknown") {
     config = {
       headers: {
-        Authorization: `Basic ${process.env.ZD_AUTH}`,
+        Authorization: `Basic ${ZD_AUTH}`,
         "Content-Type": "application/json",
       },
       method: "PUT",
@@ -55,7 +90,7 @@ async function updateZendeskTicket(ticket_id, classification) {
     method: "PUT",
     url: `https://${process.env.ZD_SUBDOMAIN}.zendesk.com/api/v2/tickets/update_many`,
     headers: {
-      Authorization: `Basic ${process.env.ZD_AUTH}`,
+      Authorization: `Basic ${ZD_AUTH}`,
       "Content-Type": "application/json",
     },
     params: { ids: urlEncodedTicketId },
